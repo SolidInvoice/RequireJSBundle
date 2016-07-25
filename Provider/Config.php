@@ -9,8 +9,6 @@ use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
 
 use Doctrine\Common\Cache\CacheProvider;
 
-use Oro\Component\PhpUtils\ArrayUtil;
-
 /**
  * @deprecated Added for backwards compatibility,
  * use {@class Oro\Bundle\RequireJSBundle\Provider\ConfigProvider} instead
@@ -153,7 +151,7 @@ class Config
                 $reflection = new \ReflectionClass($bundle);
                 if (is_file($file = dirname($reflection->getFilename()) . '/Resources/config/requirejs.yml')) {
                     $requirejs = Yaml::parse(file_get_contents(realpath($file)));
-                    $config = ArrayUtil::arrayMergeRecursiveDistinct($config, $requirejs);
+                    $config = self::arrayMergeRecursiveDistinct($config, $requirejs);
                 }
             }
 
@@ -161,5 +159,36 @@ class Config
         }
 
         return $this->collectedConfig;
+    }
+
+    /**
+     * Recursively merge arrays.
+     *
+     * Merge two arrays as array_merge_recursive do, but instead of converting values to arrays when keys are same
+     * replaces value from first array with value from second
+     *
+     * @param array $first
+     * @param array $second
+     *
+     * @return array
+     */
+    public static function arrayMergeRecursiveDistinct(array $first, array $second)
+    {
+        foreach ($second as $idx => $value) {
+            if (is_integer($idx)) {
+                $first[] = $value;
+            } else {
+                if (!array_key_exists($idx, $first)) {
+                    $first[$idx] = $value;
+                } else {
+                    if (is_array($value)) {
+                        $first[$idx] = self::arrayMergeRecursiveDistinct($first[$idx], $value);
+                    } else {
+                        $first[$idx] = $value;
+                    }
+                }
+            }
+        }
+        return $first;
     }
 }
