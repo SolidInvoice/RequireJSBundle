@@ -31,21 +31,21 @@ class Configuration implements ConfigurationInterface
                         ->booleanNode('enforceDefine')->end()
                         // @see http://requirejs.org/docs/api.html#config-scriptType
                         ->scalarNode('scriptType')->cannotBeEmpty()->end()
-                        ->scalarNode('baseUrl')
-                            ->defaultValue('bundles')
-                            ->validate()
-                                ->ifTrue(function ($value) {
-                                    return '/' === $value[0] || '.' === $value[0] || '/' === substr($value, -1);
-                                })
-                                ->thenInvalid('"baseUrl" should only contain the name of the directory relative to the webroot.')
-                            ->end()
-                        ->end()
                     ->end()
                 ->end()
                 ->scalarNode('web_root')->defaultValue('%kernel.root_dir%/../web')->end()
                 ->scalarNode('js_engine')->defaultNull()->end()
                 ->scalarNode('build_path')->defaultValue('js/app.min.js')->end()
                 ->integerNode('building_timeout')->min(1)->defaultValue(60)->end()
+                ->scalarNode('base_url')
+                    ->defaultValue('bundles')
+                    ->validate()
+                        ->ifTrue(function ($value) {
+                            return '/' === $value[0] || '.' === $value[0] || '/' === substr($value, -1);
+                        })
+                        ->thenInvalid('"base_url" should only contain the name of the directory relative to the webroot.')
+                    ->end()
+                ->end()
                 ->arrayNode('build')
                     ->addDefaultsIfNotSet()
                     ->children()
