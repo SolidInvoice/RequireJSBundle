@@ -50,7 +50,8 @@ class Config
     /**
      * @param ContainerInterface $container
      * @param EngineInterface $templating
-     * @param $template
+     * @param string $template
+     * @param string $baseUrl
      */
     public function __construct(ContainerInterface $container, EngineInterface $templating, $template, $baseUrl)
     {
@@ -102,7 +103,7 @@ class Config
         $config = $requirejs['config'];
         if (!empty($config['paths']) && is_array($config['paths'])) {
             foreach ($config['paths'] as &$path) {
-                if (substr($path, 0, strlen($this->baseUrl)) === $this->baseUrl.'/') {
+                if (substr($path, 0, strlen($this->baseUrl) + 1) === $this->baseUrl.'/') {
                     $path = substr($path, 8);
                 }
                 if (substr($path, -3) === '.js') {
