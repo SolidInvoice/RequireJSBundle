@@ -43,15 +43,21 @@ class Config
     protected $collectedConfig;
 
     /**
+     * @var string
+     */
+    protected $baseUrl;
+
+    /**
      * @param ContainerInterface $container
      * @param EngineInterface $templating
      * @param $template
      */
-    public function __construct(ContainerInterface $container, EngineInterface $templating, $template)
+    public function __construct(ContainerInterface $container, EngineInterface $templating, $template, $baseUrl)
     {
         $this->container = $container;
         $this->templating = $templating;
         $this->template = $template;
+        $this->baseUrl = $baseUrl;
     }
 
     /**
@@ -96,7 +102,7 @@ class Config
         $config = $requirejs['config'];
         if (!empty($config['paths']) && is_array($config['paths'])) {
             foreach ($config['paths'] as &$path) {
-                if (substr($path, 0, 8) === 'bundles/') {
+                if (substr($path, 0, strlen($this->baseUrl)) === $this->baseUrl.'/') {
                     $path = substr($path, 8);
                 }
                 if (substr($path, -3) === '.js') {
@@ -117,7 +123,7 @@ class Config
     {
         $config = $this->collectConfigs();
 
-        $config['build']['baseUrl'] = './bundles';
+        $config['build']['baseUrl'] = './'.$this->baseUrl;
         $config['build']['out'] = './' . $config['build_path'];
         $config['build']['mainConfigFile'] = './' . $configPath;
 

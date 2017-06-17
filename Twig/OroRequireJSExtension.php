@@ -53,6 +53,9 @@ class OroRequireJSExtension extends \Twig_Extension
                 'requirejs_build_exists',
                 [$this, 'isRequireJSBuildExists']
             ),
+            new \Twig_SimpleFunction('requirejs_base_url', function () use ($container) {
+                return $container->getParameter('oro_require_js.base_url');
+            }),
         ];
     }
 
