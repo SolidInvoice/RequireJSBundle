@@ -113,7 +113,7 @@ abstract class AbstractConfigProvider implements ConfigProviderInterface
      *
      * @param RequireJSConfig $config
      *
-     * @return ConfigProvider
+     * @return $this
      */
     protected function collectMainConfig(RequireJSConfig $config)
     {
@@ -144,7 +144,7 @@ abstract class AbstractConfigProvider implements ConfigProviderInterface
      *
      * @param RequireJSConfig $config
      *
-     * @return ConfigProvider
+     * @return $this
      */
     protected function collectBuildConfig(RequireJSConfig $config)
     {
@@ -181,17 +181,53 @@ abstract class AbstractConfigProvider implements ConfigProviderInterface
     /**
      * Collect require.js config from all bundles
      *
-     * @return ConfigProvider
+     * @return $this
      */
     protected function collectBundlesConfig()
     {
         foreach ($this->bundles as $bundle) {
             foreach ($this->getFiles($bundle) as $file) {
                 $config = Yaml::parse(file_get_contents(realpath($file)));
-                $this->config = ArrayUtil::arrayMergeRecursiveDistinct($this->config, $config);
+                $this->config = self::arrayMergeRecursiveDistinct($this->config, $config);
             }
         }
 
         return $this;
+    }
+
+    /**
+     * Recursively merge arrays.
+     *
+     * Merge two arrays as array_merge_recursive do, but instead of converting values to arrays when keys are same
+     * replaces value from first array with value from second
+     *
+     * @param array $first
+     * @param array $second
+     *
+     * @return array
+     */
+    private static function arrayMergeRecursiveDistinct(array $first, array $second)
+    {
+        foreach ($second as $idx => $value) {
+            if (is_integer($idx)) {
+                $first[] = $value;
+            } else {
+                if (!array_key_exists($idx, $first)) {
+                    $first[$idx] = $value;
+                } else {
+                    if (is_array($value)) {
+                        if (is_array($first[$idx])) {
+                            $first[$idx] = self::arrayMergeRecursiveDistinct($first[$idx], $value);
+                        } else {
+                            $first[$idx] = $value;
+                        }
+                    } else {
+                        $first[$idx] = $value;
+                    }
+                }
+            }
+        }
+
+        return $first;
     }
 }
